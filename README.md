@@ -1,21 +1,11 @@
 ## Getting Started
 
-1. **Navigate to the project directory:**
-    ```bash
-    cd your-project
-    ```
-
-2. **Install dependencies:**
+1. **Install dependencies:**
     ```bash
     composer install
     ```
 
-3. **Run migrations:**
-    ```bash
-    php artisan migrate
-    ```
-
-4. **Start the server:**
+2. **Start the server:**
     ```bash
     php artisan serve
     ```
