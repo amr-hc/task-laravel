@@ -2,8 +2,11 @@
 
 namespace App\Console;
 
+use App\Jobs\LogDataApi;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Jobs\DeletePosts;
+
 
 class Kernel extends ConsoleKernel
 {
@@ -12,7 +15,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->job(new DeletePosts)->daily();
+        $schedule->job(new LogDataApi)->everySixHours();
+        $schedule->job(new LogDataApi)->everySecond();
+
     }
 
     /**

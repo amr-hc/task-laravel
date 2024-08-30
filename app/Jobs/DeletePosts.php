@@ -7,6 +7,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
+use App\Models\Post;
+
+
 
 class DeletePosts implements ShouldQueue
 {
@@ -23,8 +27,14 @@ class DeletePosts implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle()
     {
-        //
+        $date = Carbon::now()->subDays(30);
+
+        Post::onlyTrashed()
+            ->where('deleted_at', '<=', $date)
+            ->forceDelete();
+
     }
+
 }

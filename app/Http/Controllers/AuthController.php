@@ -7,9 +7,9 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Requests\RegisterRequest;
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\VerifyCodeRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\VerifyCodeRequest;
 
 use App\Models\User;
 use App\Models\VerificationCode;
@@ -18,8 +18,6 @@ class AuthController extends Controller
 {
     public function register(RegisterRequest $request)
     {
-
-
         $user = User::create([
             'name' => $request->name,
             'phone' => $request->phone,
@@ -33,7 +31,8 @@ class AuthController extends Controller
             'code' => $verification_code,
         ]);
 
-        Log::info('Verification code for user ID :'. $user->id . ', Phone : ' . $user->phone . ', Code : ' . $verification_code);
+        // Log the verification code to the custom 'codes' channel
+        Log::channel('codes')->info('Verification code for user ID :'. $user->id . ', Phone : ' . $user->phone . ', Code : ' . $verification_code);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -41,8 +40,11 @@ class AuthController extends Controller
             'data' => ['user' => $user, 'token' => $token],
             'status' => 'success',
             'message' => 'Registration successful! A verification code has been sent to your phone.'
-        ],201);
+        ], 201);
     }
+
+    
+
 
 
     public function login(LoginRequest $request)
@@ -110,7 +112,7 @@ class AuthController extends Controller
     public function resendVerificationCode(Request $request)
     {
         $request->validate([
-            'phone' => 'required|string',
+            'phone' => 'required|string|digits_between:10,15',
         ]);
 
         $user = User::where('phone', $request->phone)->first();
@@ -130,7 +132,7 @@ class AuthController extends Controller
             ['code' => $verification_code, 'attempts' => 0]
         );
 
-        Log::info('Verification code for user ID :'. $user->id . ', Phone : ' . $user->phone . ', Code : ' . $verification_code);
+        Log::channel('codes')->info('Verification code for user ID :'. $user->id . ', Phone : ' . $user->phone . ', Code : ' . $verification_code);
 
         return response()->json(['message' => 'Verification code resent successfully']);
     }
