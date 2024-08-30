@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Auth\ResendVerificationCodeRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -13,6 +13,9 @@ use App\Http\Requests\Auth\VerifyCodeRequest;
 
 use App\Models\User;
 use App\Models\VerificationCode;
+use App\Jobs\SendVerificationCode;
+
+
 
 class AuthController extends Controller
 {
@@ -31,7 +34,8 @@ class AuthController extends Controller
             'code' => $verification_code,
         ]);
 
-        // Log the verification code to the custom 'codes' channel
+        SendVerificationCode::dispatch($user->phone, $verification_code);
+
         Log::channel('codes')->info('Verification code for user ID :'. $user->id . ', Phone : ' . $user->phone . ', Code : ' . $verification_code);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -109,11 +113,8 @@ class AuthController extends Controller
     }
 
 
-    public function resendVerificationCode(Request $request)
+    public function resendVerificationCode(ResendVerificationCodeRequest $request)
     {
-        $request->validate([
-            'phone' => 'required|string|digits_between:10,15',
-        ]);
 
         $user = User::where('phone', $request->phone)->first();
 
@@ -131,6 +132,8 @@ class AuthController extends Controller
             ['user_id' => $user->id],
             ['code' => $verification_code, 'attempts' => 0]
         );
+
+        SendVerificationCode::dispatch($user->phone, $verification_code);
 
         Log::channel('codes')->info('Verification code for user ID :'. $user->id . ', Phone : ' . $user->phone . ', Code : ' . $verification_code);
 

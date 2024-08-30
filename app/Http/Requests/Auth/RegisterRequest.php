@@ -23,9 +23,16 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|digits_between:10,15|unique:users',
+            'phone' => ['required', 'string', 'regex:/^(010|011|012)[0-9]{8}$/', 'unique:users'],
             'password' => 'required|string|min:8',
         ];
 
+    }
+
+    public function messages(): array
+    {
+        return [
+            'phone.regex' => 'The phone number must start with 010, 011, or 012 and be exactly 11 digits long.',
+        ];
     }
 }

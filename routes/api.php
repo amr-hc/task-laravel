@@ -18,17 +18,12 @@ use App\Http\Controllers\PostController;
 |
 */
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-
-
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
     Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
     Route::post('/verify', [AuthController::class, 'verify'])->name('auth.verify');
-    Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode'])->name('auth.resendVerificationCode');
+    Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode'])->name('auth.resendVerificationCode')->middleware('throttle:5,1');
 });
 
 Route::middleware('auth:sanctum')->group(function () {
